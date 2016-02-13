@@ -64,7 +64,7 @@ typedef struct osprd_info {
 
 	/* HINT: You may want to add additional fields to help
 	         in detecting deadlock. */
-
+	unsigned my_ticket;
 	// The following elements are used internally; you don't need
 	// to understand them.
 	struct request_queue *queue;    // The device request queue.
@@ -111,6 +111,23 @@ static void osprd_process_request(osprd_info_t *d, struct request *req)
 		end_request(req, 0);
 		return;
 	}
+//determine if read or write
+	unsigned int reqType - rq_data_dir(req);
+//compute offset, set pointer to correct region
+	uint8_t * ptr = d->data + (reg->sector) * SECTOR_SIZE;
+	//copy data
+	if(reqType == READ) {
+		//with lock, need to obtain lock first when thre's a read and write from/to devices
+		//try acquire for polling, ospriocacquire is for blocking
+		//ioctrl(d->fd)
+		memcpy((void *) req->buffer, (void *) ptr, req->current_nr_sectors * SECTOR_SIZE);
+		//ioctrl(devfd, OSPRDIOCRELEASE, NULL)
+	}
+	if(reqType == WRITE) {
+		//switch source and destination
+		memcpy((void *) ptr, (void *) req->buffer, req->current_nr_sectors);
+	}
+
 
 	// EXERCISE: Perform the read or write request by copying data between
 	// our data array and the request's buffer.
