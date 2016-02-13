@@ -64,7 +64,8 @@ typedef struct osprd_info {
 
 	/* HINT: You may want to add additional fields to help
 	         in detecting deadlock. */
-	unsigned my_ticket;
+	//unsigned my_ticket;
+    
 	// The following elements are used internally; you don't need
 	// to understand them.
 	struct request_queue *queue;    // The device request queue.
@@ -125,7 +126,7 @@ static void osprd_process_request(osprd_info_t *d, struct request *req)
 	}
 	if(reqType == WRITE) {
 		//switch source and destination
-		memcpy((void *) ptr, (void *) req->buffer, req->current_nr_sectors);
+		memcpy((void *) ptr, (void *) req->buffer, req->current_nr_sectors * SECTOR_SIZE);
 	}
 
 
@@ -190,6 +191,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 int osprd_ioctl(struct inode *inode, struct file *filp,
 		unsigned int cmd, unsigned long arg)
 {
+	
 	osprd_info_t *d = file2osprd(filp);	// device info
 	int r = 0;			// return value: initially 0
 
@@ -200,9 +202,31 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 	(void) filp_writable, (void) d;
 
 	// Set 'r' to the ioctl's return value: 0 on success, negative on error
-
+	unsigned my_ticket;
 	if (cmd == OSPRDIOCACQUIRE) {
 
+		osp_spin_lock(&(d->mutex));
+		my_ticket = d->ticket_head;
+		d->ticket_head++;
+		osp_spin_lock(&(d->mutex));
+		if(filp_writable) { //write lock
+			if(wait_event_interruptible(wait_queue_head_t q, d->ticket_tail == my_ticket && 
+				d->write_locking_pids->size == 0 && d->read_locking_pids->size==0)){
+				if(d->ticket_tail ==my_ticket){
+					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
+					wake_up_all(&(d->blockq));
+				}
+				else {
+					//add to ticket list
+				}
+				return -ERESTARTSYS;
+			}
+			filp->f_flags = F_OSPRD_LOCKED;
+			//add to pid list write helper function
+			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail + 1) 
+			return 0;
+
+		}
 		// EXERCISE: Lock the ramdisk.
 		//
 		// If *filp is open for writing (filp_writable), then attempt
@@ -239,8 +263,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		// be protected by a spinlock; which ones?)
 
 		// Your code here (instead of the next two lines).
-		eprintk("Attempting to acquire\n");
-		r = -ENOTTY;
+		//eprintk("Attempting to acquire\n");
+		//r = -ENOTTY;
 
 	} else if (cmd == OSPRDIOCTRYACQUIRE) {
 
@@ -265,7 +289,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		// you need, and return 0.
 
 		// Your code here (instead of the next line).
-		r = -ENOTTY;
+		//r = -ENOTTY;
 
 	} else
 		r = -ENOTTY; /* unknown command */
