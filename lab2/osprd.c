@@ -204,7 +204,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 	// Set 'r' to the ioctl's return value: 0 on success, negative on error
 	unsigned my_ticket;
 	if (cmd == OSPRDIOCACQUIRE) {
-
+/*
 		osp_spin_lock(&(d->mutex));
 		my_ticket = d->ticket_head;
 		d->ticket_head++;
@@ -227,6 +227,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			return 0;
 
 		}
+*/
 		// EXERCISE: Lock the ramdisk.
 		//
 		// If *filp is open for writing (filp_writable), then attempt
@@ -263,8 +264,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		// be protected by a spinlock; which ones?)
 
 		// Your code here (instead of the next two lines).
-		//eprintk("Attempting to acquire\n");
-		//r = -ENOTTY;
+		eprintk("Attempting to acquire\n");
+		r = -ENOTTY;
 
 	} else if (cmd == OSPRDIOCTRYACQUIRE) {
 
