@@ -112,9 +112,9 @@ static void osprd_process_request(osprd_info_t *d, struct request *req)
 		return;
 	}
 //determine if read or write
-	unsigned int reqType - rq_data_dir(req);
+	unsigned int reqType = rq_data_dir(req);
 //compute offset, set pointer to correct region
-	uint8_t * ptr = d->data + (reg->sector) * SECTOR_SIZE;
+	uint8_t * ptr = d->data + (req->sector) * SECTOR_SIZE;
 	//copy data
 	if(reqType == READ) {
 		//with lock, need to obtain lock first when thre's a read and write from/to devices
