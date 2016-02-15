@@ -266,7 +266,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		return -EDEADLK;
 	}
 	
-	pid_list_t* check = d->(&read_lock_pids);
+	pid_list_t* check = (&(d->read_lock_pids));
 	while(1){ //check for all dead locks, cant try to write something you already have
 		if(check == NULL)
 			break;
