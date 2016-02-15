@@ -422,7 +422,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 }
 	else if (cmd == OSPRDIOCRELEASE) {
 
-		if((filp->flags & F_OSPRD_LCOKED) == 0)
+		if((filp->f_flags & F_OSPRD_LCOKED) == 0)
 			return -EINVAL;
 
 		osp_spin_lock(&(d->mutex));
@@ -433,7 +433,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		else {
 			d->read_lock--;
 			//remove from read_lock_pids
-			pid_list_t* ptr = read_lock_pids;
+			pid_list_t* ptr = &(d->read_lock_pids);
 			while(1){
 				if(ptr == NULL)
 					break;
