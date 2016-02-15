@@ -286,7 +286,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 
 	if (cmd == OSPRDIOCACQUIRE) { //attempt write lock
-		if(filp_writeable)
+		if(filp_writable)
 		{
 			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->read_lock == 0 && write_lock ==0))
 			{
@@ -296,7 +296,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
 					wake_up_all(&(d->blockq));
 				}
-				else(d->ticket_tail != my_ticket)
+				else if(d->ticket_tail != my_ticket)
 				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket);
 				}
@@ -304,8 +304,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			}
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags = F_OSPRD_LOCKED;
-			write_lock_pid = current->pid;
-			write_lock = 1;
+			d->write_lock_pid = current->pid;
+			d->write_lock = 1;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			osp_spin_unlock(&(d->mutex));
 			return 0;
@@ -382,8 +382,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags = F_OSPRD_LOCKED;
-			write_lock_pid = current->pid;
-			write_lock = 1;
+			d->write_lock_pid = current->pid;
+			d->write_lock = 1;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			//d->ticket_head= return_valid_ticket(d->invalid_tickets, d->ticket_head+1); 
 			//i think the head increment is always taken care of via the my_ticket delcaration
