@@ -422,7 +422,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 }
 	else if (cmd == OSPRDIOCRELEASE) {
 
-		if((filp->f_flags & F_OSPRD_LCOKED) == 0)
+		if((filp->f_flags & F_OSPRD_LOCKED) == 0)
 			return -EINVAL;
 
 		osp_spin_lock(&(d->mutex));
@@ -477,10 +477,10 @@ static void osprd_setup(osprd_info_t *d)
 	osp_spin_lock_init(&d->mutex);
 	d->ticket_head = d->ticket_tail = 0;
 	d->write_lock = d->read_lock = 0;
-	d->invalid_tickets->next = NULL;
-	d->invalid_tickets->ticketnumber = -1;
-	d->read_lock_pids->next = NULL;
-	d->read_lock_pids->pid = -1;
+	d->invalid_tickets.next = NULL;
+	d->invalid_tickets.ticketnumber = -1;
+	d->read_lock_pids.next = NULL;
+	d->read_lock_pids.pid = -1;
 	d->write_lock_pid = -1;
 
 	/* Add code here if you add fields to osprd_info_t. */
