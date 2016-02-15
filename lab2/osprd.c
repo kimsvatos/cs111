@@ -48,13 +48,13 @@ module_param(nsectors, int, 0);
 
 typedef struct pid_list {
 	int pid;
-	pid_list_t* next; 
+	struct pid_list* next; 
 
 } pid_list_t;
 
 typedef struct invalid_tickets {
 	int ticketnumber;
-	invalidtickets_t* next; 
+	struct invalid_tickets* next; 
 
 } invalidtickets_t;
 
@@ -427,7 +427,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 		osp_spin_lock(&(d->mutex));
 		if(filp_writable){
-			d->write_locked = 0;
+			d->write_lock = 0;
 			d->write_lock_pid = -1;
 		}
 		else {
