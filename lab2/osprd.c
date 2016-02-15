@@ -327,7 +327,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			filp->f_flags = F_OSPRD_LOCKED;
 			add_to_pid_list(current->pid); //add to read lock list
 			d->read_lock++;
-			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1)
+			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			osp_spin_unlock(&(d->mutex));
 			return 0;
 
@@ -476,7 +476,7 @@ static void osprd_setup(osprd_info_t *d)
 	init_waitqueue_head(&d->blockq);
 	osp_spin_lock_init(&d->mutex);
 	d->ticket_head = d->ticket_tail = 0;
-	d->write_lock = read_lock = 0;
+	d->write_lock = d->read_lock = 0;
 	d->invalid_tickets->next = NULL;
 	d->invalid_tickets->ticketnumber = -1;
 	d->read_lock_pids->next = NULL;
