@@ -378,7 +378,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		if(filp_writable){
 			if(d->read_lock > 0 || d->write_lock ==1)
 				return -EBUSY;
-			}
+			
 
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags = F_OSPRD_LOCKED;
@@ -419,8 +419,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		// Your code here (instead of the next two lines).
 		//eprintk("Attempting to try acquire\n");
 		//r = -ENOTTY;
-
-	 else if (cmd == OSPRDIOCRELEASE) {
+}
+	else if (cmd == OSPRDIOCRELEASE) {
 
 		if((filp->flags & F_OSPRD_LCOKED) == 0)
 			return -EINVAL;
