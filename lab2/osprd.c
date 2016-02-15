@@ -271,7 +271,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		if(check == NULL)
 			break;
 		if(check->pid == current->pid)
-			reutrn -EDEADLK;
+			return -EDEADLK;
 		check = check->next;
 	}
 
@@ -288,7 +288,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 	if (cmd == OSPRDIOCACQUIRE) { //attempt write lock
 		if(filp_writable)
 		{
-			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->read_lock == 0 && write_lock ==0))
+			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->read_lock == 0 && d->write_lock ==0))
 			{
 				//if ticket tail = my ticket, i'm next process!
 				if(d->ticket_tail == my_ticket)
@@ -375,7 +375,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 	} else if (cmd == OSPRDIOCTRYACQUIRE) {
 //same code as above basically but dont use wait_event_interruptbile, void waitqueue_active(wait_queuehead_t *q != 0, o means empty
-		if(filp_writeable){
+		if(filp_writable){
 			if(d->read_lock > 0 || d->write_lock ==1)
 				return -EBUSY;
 			}
