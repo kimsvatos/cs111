@@ -317,7 +317,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		else  //get read lock cause not open for writing
 		{
 			eprintk("in ELSE filp_writeable if before wait_event func\n");
-			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 1 )) {
+			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
 				if(d->ticket_tail == my_ticket){
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
 					wake_up_all(&(d->blockq));
