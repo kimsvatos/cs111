@@ -266,7 +266,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		return -EDEADLK;
 	}
 	
-	pid_list_t* check = d->read_lock_pids;
+	pid_list_t* check = d->(&read_lock_pids);
 	while(1){ //check for all dead locks, cant try to write something you already have
 		if(check == NULL)
 			break;
@@ -313,7 +313,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		}
 		else  //get read lock cause not open for writing
 		{
-			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && write_lock ==0)) {
+			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock ==0)) {
 				if(d->ticket_tail == my_ticket){
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
 					wake_up_all(&(d->blockq));
