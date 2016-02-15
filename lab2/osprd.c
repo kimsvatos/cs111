@@ -48,13 +48,13 @@ module_param(nsectors, int, 0);
 
 typedef struct pid_list {
 	int pid;
-	pid_list* next; 
+	pid_list_t* next; 
 
 } pid_list_t;
 
 typedef struct invalid_tickets {
 	int ticketnumber;
-	invalid_tickets* next; 
+	invalidtickets_t* next; 
 
 } invalidtickets_t;
 
