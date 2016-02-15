@@ -116,7 +116,7 @@ int return_valid_ticket(invalidtickets_t invalid, unsigned ticket)
 
 void add_to_invalid_list(invalidtickets_t invalid, unsigned ticket, osprd_info_t *d)
 {
-	invalidtickets_t* ptr= invalid;
+	invalidtickets_t* ptr= &invalid;
 	while(ptr->next != NULL)
 		ptr = ptr->next;
 
