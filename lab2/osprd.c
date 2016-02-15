@@ -394,7 +394,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		}
 		else 
 		{
-			if(d->write_locked == 1)
+			if(d->write_lock == 1)
 				return -EBUSY;
 
 			//get a read lock
@@ -476,12 +476,12 @@ static void osprd_setup(osprd_info_t *d)
 	init_waitqueue_head(&d->blockq);
 	osp_spin_lock_init(&d->mutex);
 	d->ticket_head = d->ticket_tail = 0;
-	write_lock = read_lock = 0;
-	invalid_tickets->next = NULL;
-	invalid_tickets->ticketnumber = -1;
-	read_lock_pids->next = NULL;
-	read_lock_pids->pid = -1;
-	write_lock_pid = -1;
+	d->write_lock = read_lock = 0;
+	d->invalid_tickets->next = NULL;
+	d->invalid_tickets->ticketnumber = -1;
+	d->read_lock_pids->next = NULL;
+	d->read_lock_pids->pid = -1;
+	d->write_lock_pid = -1;
 
 	/* Add code here if you add fields to osprd_info_t. */
 }
