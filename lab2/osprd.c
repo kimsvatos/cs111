@@ -298,7 +298,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}
 				else if(d->ticket_tail != my_ticket)
 				{
-					add_to_invalid_list(d->invalid_tickets, my_ticket);
+					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 				}
 				return -ERESTARTSYS;
 			}
@@ -319,13 +319,13 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					wake_up_all(&(d->blockq));
 				}
 				else if(d->ticket_tail != my_ticket)
-					add_to_invalid_list(d->invalid_tickets, my_ticket);
+					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 				
 				return -ERESTARTSYS;
 			}
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags = F_OSPRD_LOCKED;
-			add_to_pid_list(current->pid); //add to read lock list
+			add_to_pid_list(current->pid, d); //add to read lock list
 			d->read_lock++;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			osp_spin_unlock(&(d->mutex));
@@ -400,7 +400,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//get a read lock
 			osp_spin_lock(&(d->mutex));	
 			d->read_lock++;
-			add_to_pid_list(current->pid);
+			add_to_pid_list(current->pid, d);
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			//d->ticket_head= return_valid_ticket(d->invalid_tickets, d->ticket_head+1);
 			filp->f_flags = F_OSPRD_LOCKED;
