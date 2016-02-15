@@ -98,13 +98,13 @@ static osprd_info_t osprds[NOSPRD];
 
 int return_valid_ticket(invalidtickets_t invalid, unsigned ticket)
 {
-	pid_list_t ptr = invalid; 
+	pid_list_t* ptr = &invalid; 
 	while(1){
  		
- 			if(*ptr == ticket)
+ 			if(ptr->ticketnumber == ticket)
  				{
  					ticket++;
- 					ptr = invalid;
+ 					ptr = &invalid;
  					continue;
  				}
 
@@ -127,7 +127,7 @@ void add_to_invalid_list(invalidtickets_t invalid, unsigned ticket, osprd_info_t
 }
 
 void add_to_pid_list(int newpid, osprd_info_t *d){ //add to list of pids that have read locks
-	pid_list_t* ptr = d->read_lock_pids;
+	pid_list_t* ptr = &(d->read_lock_pids);
 	while(ptr->next != NULL)
 	{
 		ptr = ptr->next;
