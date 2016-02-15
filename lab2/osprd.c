@@ -98,7 +98,7 @@ static osprd_info_t osprds[NOSPRD];
 
 int return_valid_ticket(invalidtickets_t invalid, unsigned ticket)
 {
-	pid_list_t* ptr = &invalid; 
+	invalidtickets_t* ptr = &invalid; 
 	while(1){
  		
  			if(ptr->ticketnumber == ticket)
