@@ -318,7 +318,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
 					wake_up_all(&(d->blockq));
 				}
-				else(d->ticket_tail != my_ticket)
+				else if(d->ticket_tail != my_ticket)
 					add_to_invalid_list(d->invalid_tickets, my_ticket);
 				
 				return -ERESTARTSYS;
