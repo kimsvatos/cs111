@@ -420,7 +420,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		//eprintk("Attempting to try acquire\n");
 		//r = -ENOTTY;
 
-	} else if (cmd == OSPRDIOCRELEASE) {
+	 else if (cmd == OSPRDIOCRELEASE) {
 
 		if((filp->flags & F_OSPRD_LCOKED) == 0)
 			return -EINVAL;
