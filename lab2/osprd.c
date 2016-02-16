@@ -324,7 +324,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 			d->write_lock_pid = -1;
 			d->write_lock = 0;
 		}
-}
+
 
 	
 		else {
@@ -339,7 +339,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 		wake_up_all(&(d->blockq));
 		osp_spin_unlock(&(d->mutex));
 		//wake_up_all(&(d->blockq));
-
+}
 		// This line avoids compiler warnings; you may remove it.
 		(void) filp_writable, (void) d;
 
