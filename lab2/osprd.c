@@ -122,13 +122,13 @@ void add_to_invalid_list(invalidtickets_t* invalid, unsigned ticket)
 		invalid->ticketnumber = ticket;
 	}
 	//invalidtickets_t* ptr= invalid;
-	while(ptr->next != NULL)
-		ptr = ptr->next;
+	while(invalid->next != NULL)
+		invalid = invalid->next;
 
 	invalidtickets_t new;
 	new.ticketnumber = ticket;
 	new.next = NULL;
-	ptr->next = &new;
+	invalid->next = &new;
 	return;
 
 }
