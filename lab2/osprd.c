@@ -365,7 +365,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		}
 		else  //get read lock cause not open for writing
 		{
-			eprintk("in ELSE filp_writeable if before wait_event func\n");
+			eprintk("in ELSE filp_writeable  so about to try and get read \n");
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
 
@@ -386,7 +386,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			}
 			
 
-			eprintk("in ELSE writeable, wait_event must have returned zero\n");
+			eprintk("gonna get lock now, wait_event must have returned zero\n");
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
 
