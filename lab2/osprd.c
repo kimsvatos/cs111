@@ -174,7 +174,15 @@ void remove_from_pid_list(pid_t oldpid, pid_list_t* list)
 	return;
 }
 
+// Declare useful helper functions
 
+/*
+ * file2osprd(filp)
+ *   Given an open file, check whether that file corresponds to an OSP ramdisk.
+ *   If so, return a pointer to the ramdisk's osprd_info_t.
+ *   If not, return NULL.
+ */
+static osprd_info_t *file2osprd(struct file *filp);
 
 /*
 * deadlock_check(file*)
@@ -214,6 +222,7 @@ int deadlock_check(struct file* filp){
 	eprintk("\n");
 	return 0;
 }
+
 // Declare useful helper functions
 
 /*
@@ -222,7 +231,7 @@ int deadlock_check(struct file* filp){
  *   If so, return a pointer to the ramdisk's osprd_info_t.
  *   If not, return NULL.
  */
-static osprd_info_t *file2osprd(struct file *filp);
+//static osprd_info_t *file2osprd(struct file *filp);
 
 /*
  * for_each_open_file(task, callback, user_data)
