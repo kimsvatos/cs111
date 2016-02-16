@@ -247,15 +247,12 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 			while(1){
 				if(ptr == NULL)
 					break;
-				if(ptr->next == NULL && ptr->pid == current->pid)
+
+				if(ptr->pid == current->pid){
 					ptr->pid = -1;
-
-				if(ptr->next->pid == current->pid)
-				{
-					ptr->next = ptr->next->next;
 					break;
-				}	
-
+			}
+				
 				ptr = ptr->next;
 			}
 
