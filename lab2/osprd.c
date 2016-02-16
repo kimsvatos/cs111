@@ -311,7 +311,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 	if(filp->f_flags & F_OSPRD_LOCKED) {
 		filp->f_flags &= ~F_OSPRD_LOCKED;
 		osp_spin_lock(&(d->mutex));
-		if(filp_writeable){
+		if(filp_writable){
 			d->write_lock_pid = -1;
 			d->write_lock = 0;
 		}
@@ -406,7 +406,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}
 				else if(d->ticket_tail != my_ticket)
 				{
-					add_to_invalid_list(&(d->invalid_tickets), my_ticket;
+					add_to_invalid_list(&(d->invalid_tickets), my_ticket);
 					//d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
 				}
 				wake_up_all(&(d->mutex));
