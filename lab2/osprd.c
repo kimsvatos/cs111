@@ -371,7 +371,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				else if(d->ticket_tail != my_ticket)
 				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-					//d->ticket_head--;
+					//d->ticket_head--; 
 				}
 				return -ERESTARTSYS;
 			}
@@ -501,7 +501,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			d->read_lock--;
 			eprintk("Number of read locks: %d\n", d->read_lock);
 			//remove from read_lock_pids
-			pid_list_t* ptr = &(d->read_lock_pids);
+			/*pid_list_t* ptr = &(d->read_lock_pids);
 			while(1){
 				if(ptr == NULL)
 					break;
@@ -513,7 +513,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}	
 
 				ptr = ptr->next;
-			}
+			}*/
 
 		}
 
