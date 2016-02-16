@@ -381,7 +381,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					//d->ticket_head--; 
 				}
 				d->ticket_head--;
-				//wake_up_all(&(d->blockq));
+				wake_up_all(&(d->blockq));
 				return -ERESTARTSYS;
 			}
 			
