@@ -532,7 +532,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 		filp->f_flags ^= F_OSPRD_LOCKED;
 		osp_spin_unlock(&(d->mutex));
-		wake_up_all(&(d->blockq));
+		//wake_up_all(&(d->blockq));
 		// EXERCISE: Unlock the ramdisk.
 		//
 		// If the file hasn't locked the ramdisk, return -EINVAL.
