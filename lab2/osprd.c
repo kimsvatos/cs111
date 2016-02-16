@@ -339,7 +339,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				else if(d->ticket_tail != my_ticket)
 				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-					d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
+					//d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
 				}
 				return -ERESTARTSYS;
 			}
@@ -351,7 +351,10 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			d->write_lock_pid = current->pid;
 			d->write_lock = 1;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+			eprintk("write lock is: %d\n", d->write_lock);
+			eprintk("read lock is: %d\n", d->read_lock);
 			osp_spin_unlock(&(d->mutex));
+
 			return 0;
 
 		}
@@ -368,7 +371,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				else if(d->ticket_tail != my_ticket)
 				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-					d->ticket_head--;
+					//d->ticket_head--;
 				}
 				return -ERESTARTSYS;
 			}
@@ -382,6 +385,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 			eprintk("Number of read locks: %d\n", d->read_lock);
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+			eprintk("write lock is: %d\n", d->write_lock);
+			eprintk("read lock is: %d\n", d->read_lock);
 			osp_spin_unlock(&(d->mutex));
 			return 0;
 
@@ -445,7 +450,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			//d->ticket_head= return_valid_ticket(d->invalid_tickets, d->ticket_head+1); 
 			//i think the head increment is always taken care of via the my_ticket delcaration
-		
+			eprintk("write lock is: %d\n", d->write_lock);
+			eprintk("read lock is: %d\n", d->read_lock);
 			osp_spin_unlock(&(d->mutex));
 			return 0;
 
