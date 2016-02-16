@@ -369,7 +369,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			eprintk("read lock is: %d\n", d->read_lock);
 
 			
-			if(wait_event_interruptible(d->blockq, d->ticket_tail >= my_ticket && d->write_lock == 0)) {
+			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
 				if(d->ticket_tail == my_ticket){
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
 					wake_up_all(&(d->blockq));
@@ -392,7 +392,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			osp_spin_lock(&(d->mutex));
 
 			filp->f_flags |= F_OSPRD_LOCKED;
-			add_to_pid_list(current->pid, d); //add to read lock list
+			//add_to_pid_list(current->pid, d); //add to read lock list
 			d->read_lock++;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 
@@ -401,7 +401,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 			osp_spin_unlock(&(d->mutex));
 
-			wake_up_all(&(d->blockq));
+			//wake_up_all(&(d->blockq));
 			return 0;
 
 			
