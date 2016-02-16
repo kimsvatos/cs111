@@ -342,7 +342,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 					//d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
 				}
-				d->ticket_head--;
+				//d->ticket_head--;
 				return -ERESTARTSYS;
 			}
 			eprintk("in filp_writeable if, wait_event must have returned zero\n");
@@ -380,7 +380,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 					//d->ticket_head--; 
 				}
-				d->ticket_head--;
+				//d->ticket_head--;
 				wake_up_all(&(d->blockq));
 				return -ERESTARTSYS;
 			}
