@@ -261,19 +261,26 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 	unsigned my_ticket;
 
 
-	if(d->write_lock_pid == current->pid) //it would dead lock
-	{
-		return -EDEADLK;
-	}
 	
-	pid_list_t* check = (&(d->read_lock_pids));
-	while(1){ //check for all dead locks, cant try to write something you already have
-		if(check == NULL)
-			break;
-		if(check->pid == current->pid)
+
+	// Set 'r' to the ioctl's return value: 0 on success, negative on error
+	
+
+
+	if (cmd == OSPRDIOCACQUIRE) { //attempt write lock
+		if(d->write_lock_pid == current->pid) //it would dead lock
+		{
 			return -EDEADLK;
-		check = check->next;
-	}
+		}
+	
+		pid_list_t* check = (&(d->read_lock_pids));
+		while(1){ //check for all dead locks, cant try to write something you already have
+			if(check == NULL)
+				break;
+			if(check->pid == current->pid)
+				return -EDEADLK;
+			check = check->next;
+		}
 
 
 		osp_spin_lock(&(d->mutex));
@@ -281,11 +288,6 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		d->ticket_head++;
 		osp_spin_unlock(&(d->mutex));
 
-	// Set 'r' to the ioctl's return value: 0 on success, negative on error
-	
-
-
-	if (cmd == OSPRDIOCACQUIRE) { //attempt write lock
 		eprintk("Entering AQCUIRE\n");
 		if(filp_writable)
 		{
@@ -301,12 +303,13 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				else if(d->ticket_tail != my_ticket)
 				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
+					d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
 				}
 				return -ERESTARTSYS;
 			}
 			eprintk("in filp_writeable if, wait_event must have returned zero\n");
 			osp_spin_lock(&(d->mutex));
-			filp->f_flags = F_OSPRD_LOCKED;
+			filp->f_flags |= F_OSPRD_LOCKED;
 			d->write_lock_pid = current->pid;
 			d->write_lock = 1;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
@@ -323,13 +326,15 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					wake_up_all(&(d->blockq));
 				}
 				else if(d->ticket_tail != my_ticket)
+				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-				
+					d->ticket_head--;
+				}
 				return -ERESTARTSYS;
 			}
 			eprintk("in ELSE writeable, wait_event must have returned zero\n");
 			osp_spin_lock(&(d->mutex));
-			filp->f_flags = F_OSPRD_LOCKED;
+			filp->f_flags |= F_OSPRD_LOCKED;
 			add_to_pid_list(current->pid, d); //add to read lock list
 			d->read_lock++;
 
@@ -389,9 +394,10 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			
 
 			osp_spin_lock(&(d->mutex));
-			filp->f_flags = F_OSPRD_LOCKED;
+			filp->f_flags |= F_OSPRD_LOCKED;
 			d->write_lock_pid = current->pid;
 			d->write_lock = 1;
+			d->ticket_head++;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 			//d->ticket_head= return_valid_ticket(d->invalid_tickets, d->ticket_head+1); 
 			//i think the head increment is always taken care of via the my_ticket delcaration
@@ -411,8 +417,9 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			eprintk("Number of read locks: %d\n", d->read_lock);
 			add_to_pid_list(current->pid, d);
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+			d->ticket_head++;
 			//d->ticket_head= return_valid_ticket(d->invalid_tickets, d->ticket_head+1);
-			filp->f_flags = F_OSPRD_LOCKED;
+			filp->f_flags |= F_OSPRD_LOCKED;
 			osp_spin_unlock(&(d->mutex));
 			return 0;
 		}
