@@ -132,9 +132,9 @@ void add_to_pid_list(int newpid, osprd_info_t *d){ //add to list of pids that ha
 	{
 		ptr = ptr->next;
 	}
-	pid_list_t* new;
-	ptr->next = new;
-	new->pid = newpid;
+	pid_list_t new;
+	ptr->next = &new;
+	new.pid = newpid;
 }
 // Declare useful helper functions
 
@@ -392,7 +392,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			osp_spin_lock(&(d->mutex));
 
 			filp->f_flags |= F_OSPRD_LOCKED;
-			//add_to_pid_list(current->pid, d); //add to read lock list
+			add_to_pid_list(current->pid, d); //add to read lock list
 			d->read_lock++;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 
