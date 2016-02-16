@@ -222,8 +222,8 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 	eprintk("in close last\n");
 	if (filp) {
 		osprd_info_t *d = file2osprd(filp);
-		int filp_writable = filp->f_mode & FMODE_WRITE;
-
+		int filp_writable = ((filp->f_mode & FMODE_WRITE) != 0);
+		int i;
 		// EXERCISE: If the user closes a ramdisk file that holds
 		// a lock, release the lock.  Also wake up blocked processes
 		// as appropriate.
@@ -232,28 +232,30 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 	if((filp->f_flags & F_OSPRD_LOCKED) == 0)
 			return -EINVAL;
 
+
 		osp_spin_lock(&(d->mutex));
-		if(filp_writable){
-			d->write_lock = 0;
-			d->write_lock_pid = -1;
+		if(filp->f_flags & F_OSPRD_LOCKED)
+			if(filp_writable){
+				d->write_lock = 0;
+				d->write_lock_pid = -1;
 		}
 		else {
 			d->read_lock--;
 			eprintk("Number of read locks: %d\n", d->read_lock);
 			//remove from read_lock_pids
 			pid_list_t* ptr = &(d->read_lock_pids);
-			/*while(1){
+			while(1){
 				if(ptr == NULL)
 					break;
 
 				if(ptr->pid == current->pid)
 				{
-					ptr->pid = -1;
+					ptr->next == ptr->next->next;
 					break;
 				}	
 
 				ptr = ptr->next;
-			}*/
+			}
 
 		}
 
