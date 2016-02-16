@@ -148,7 +148,7 @@ void add_to_pid_list(int newpid, pid_list_t* list){ //add to list of pids that h
 	pid_list_t new;
 	new.pid = newpid;
 	new.next = NULL;
-	ptr->next = &new;
+	list->next = &new;
 	return;
 }
 
