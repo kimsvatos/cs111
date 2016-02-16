@@ -210,17 +210,19 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 	if (filp) {
 		osprd_info_t *d = file2osprd(filp);
 		int filp_writable = ((filp->f_mode & FMODE_WRITE) != 0);
-		int i;
+		//int i;
 		// EXERCISE: If the user closes a ramdisk file that holds
 		// a lock, release the lock.  Also wake up blocked processes
 		// as appropriate.
 
 		// Your code here.
-	if((filp->f_flags & F_OSPRD_LOCKED) == 0)
-			return -EINVAL;
-
-
 		osp_spin_lock(&(d->mutex));
+	if((filp->f_flags & F_OSPRD_LOCKED) == 0){
+		osp_spin_unlock(&(d->mutex));
+			return -EINVAL;
+}
+
+		
 		if(filp->f_flags & F_OSPRD_LOCKED)
 			if(filp_writable){
 				d->write_lock = 0;
@@ -359,14 +361,14 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
 				if(d->ticket_tail == my_ticket){
 					d->ticket_tail++;// = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
-					wake_up_all(&(d->blockq));
+					//wake_up_all(&(d->blockq));
 				}
 				else if(d->ticket_tail != my_ticket)
 				{
 					//add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 					d->ticket_head--; 
 				}
-				wake_up_all(&(d->blockq));
+				//wake_up_all(&(d->blockq));
 				return -ERESTARTSYS;
 			}
 			
