@@ -512,7 +512,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		else {
 			d->read_lock--;
 			eprintk("Number of read locks: %d\n", d->read_lock);
-			remove from read_lock_pids
+			//remove from read_lock_pids
 			pid_list_t* ptr = &(d->read_lock_pids);
 			while(1){
 				if(ptr == NULL)
