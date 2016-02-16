@@ -380,7 +380,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 					//d->ticket_head--; 
 				}
-				wake_up_all(&(d->blockq));
+				d->ticket_head--;
+				//wake_up_all(&(d->blockq));
 				return -ERESTARTSYS;
 			}
 			
