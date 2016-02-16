@@ -223,20 +223,17 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 	if (filp) {
 		osprd_info_t *d = file2osprd(filp);
 		int filp_writable = ((filp->f_mode & FMODE_WRITE) != 0);
-		spin_lock(&(d->mutex));
-		//int i;
+		int i;
 		// EXERCISE: If the user closes a ramdisk file that holds
 		// a lock, release the lock.  Also wake up blocked processes
 		// as appropriate.
 
 		// Your code here.
 	if((filp->f_flags & F_OSPRD_LOCKED) == 0)
-	{
-			spin_unlock(&(d->mutex));
 			return -EINVAL;
-	}
 
-		//osp_spin_lock(&(d->mutex));
+
+		osp_spin_lock(&(d->mutex));
 		if(filp->f_flags & F_OSPRD_LOCKED)
 			if(filp_writable){
 				d->write_lock = 0;
@@ -253,7 +250,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 
 				if(ptr->pid == current->pid)
 				{
-					ptr->next = ptr->next->next;
+					ptr->next == ptr->next->next;
 					break;
 				}	
 
@@ -270,7 +267,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 		(void) filp_writable, (void) d;
 
 	}
-	//wake_up_all(&(d->blockq));
+
 	return 0;
 }
 
@@ -329,7 +326,9 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		//eprintk("Entering AQCUIRE\n");
 		if(filp_writable)
 		{
-			
+			//eprintk("in filp_writeable loop before wait_event func\n");
+			//eprintk("write lock is: %d\n", d->write_lock);
+			//eprintk("read lock is: %d\n", d->read_lock);
 			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->read_lock == 0 && d->write_lock ==0))
 			{
 				//if ticket tail = my ticket, i'm next process!
@@ -341,11 +340,13 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				else if(d->ticket_tail != my_ticket)
 				{
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-					
+					//d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
 				}
 				return -ERESTARTSYS;
 			}
-		
+			//eprintk("in filp_writeable if, wait_event must have returned zero\n");
+			//eprintk("write lock is: %d\n", d->write_lock);
+			//eprintk("read lock is: %d\n", d->read_lock);
 
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags |= F_OSPRD_LOCKED;
@@ -363,7 +364,9 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		}
 		else  //get read lock cause not open for writing
 		{
-		
+			//eprintk("in ELSE filp_writeable if before wait_event func\n");
+			//eprintk("write lock is: %d\n", d->write_lock);
+			//eprintk("read lock is: %d\n", d->read_lock);
 
 			
 			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
@@ -767,3 +770,4 @@ static void osprd_exit(void)
 // Tell Linux to call those functions at init and exit time.
 module_init(osprd_init);
 module_exit(osprd_exit);
+
