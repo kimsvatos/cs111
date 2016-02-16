@@ -346,13 +346,16 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			eprintk("in filp_writeable if, wait_event must have returned zero\n");
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
+
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags |= F_OSPRD_LOCKED;
 			d->write_lock_pid = current->pid;
 			d->write_lock = 1;
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
+
 			osp_spin_unlock(&(d->mutex));
 
 			return 0;
@@ -363,6 +366,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			eprintk("in ELSE filp_writeable if before wait_event func\n");
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
+
+			osp_spin_lock(&(d->mutex));
 			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
 				if(d->ticket_tail == my_ticket){
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
@@ -373,21 +378,28 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 					//d->ticket_head--; 
 				}
+				wake_up_all(&(d->blockq))
 				return -ERESTARTSYS;
 			}
+			osp_spin_unlock(&(d->mutex));
+			
 			eprintk("in ELSE writeable, wait_event must have returned zero\n");
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
+
+
 			osp_spin_lock(&(d->mutex));
 			filp->f_flags |= F_OSPRD_LOCKED;
 			add_to_pid_list(current->pid, d); //add to read lock list
 			d->read_lock++;
-
-			eprintk("Number of read locks: %d\n", d->read_lock);
 			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
+
 			osp_spin_unlock(&(d->mutex));
+
+			wake_up_all(&(d->blockq))
 			return 0;
 
 			
