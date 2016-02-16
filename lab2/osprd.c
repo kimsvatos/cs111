@@ -270,7 +270,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 		(void) filp_writable, (void) d;
 
 	}
-	wake_up_all(&(d->blockq));
+	//wake_up_all(&(d->blockq));
 	return 0;
 }
 
