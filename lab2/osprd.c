@@ -250,7 +250,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 
 				if(ptr->pid == current->pid)
 				{
-					ptr->next == ptr->next->next;
+					ptr->pid = -1;
 					break;
 				}	
 
@@ -329,20 +329,14 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//eprintk("in filp_writeable loop before wait_event func\n");
 			//eprintk("write lock is: %d\n", d->write_lock);
 			//eprintk("read lock is: %d\n", d->read_lock);
-			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->read_lock == 0 && d->write_lock ==0))
-			{
-				//if ticket tail = my ticket, i'm next process!
-				if(d->ticket_tail == my_ticket)
-				{
-					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
-					wake_up_all(&(d->blockq));
-				}
-				else if(d->ticket_tail != my_ticket)
-				{
-					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-					//d->ticket_head--; //JUST ADDED THIS 3:53 pm 2/15/16
-				}
-				return -ERESTARTSYS;
+			r = wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->read_lock == 0 && d->write_lock ==0);
+			if (r == -ERESTARTSYS){
+				if(my_ticket == d->ticket_tail)
+					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+				else
+					d->ticket_head--;
+
+				return r;
 			}
 			//eprintk("in filp_writeable if, wait_event must have returned zero\n");
 			//eprintk("write lock is: %d\n", d->write_lock);
@@ -369,19 +363,26 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//eprintk("read lock is: %d\n", d->read_lock);
 
 			
-			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
-				if(d->ticket_tail == my_ticket){
-					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
-					wake_up_all(&(d->blockq));
+			r = wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0); 
+				if(r == -ERESTARTSYS){
+					if(ticket == d->my_ticket)
+						d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+
+					else
+						d->ticket_head --;
+
+					return r; 
 				}
-				else if(d->ticket_tail != my_ticket)
-				{
-					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
-					//d->ticket_head--; 
-				}
-				wake_up_all(&(d->blockq));
-				return -ERESTARTSYS;
-			}
+
+				osp_spin_lock(&(d->mutex));
+				d->read_lock++;
+				add_to_pid_list(current->pid, d);
+				d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+				filp->f_flags |= F_OSPRD_LOCKED;
+				osp_spin_unlock(&(d->mutex));
+
+
+		}
 			
 
 			//eprintk("in ELSE writeable, wait_event must have returned zero\n");
@@ -389,20 +390,20 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//eprintk("read lock is: %d\n", d->read_lock);
 
 
-			osp_spin_lock(&(d->mutex));
+			//osp_spin_lock(&(d->mutex));
 
-			filp->f_flags |= F_OSPRD_LOCKED;
-			add_to_pid_list(current->pid, d); //add to read lock list
-			d->read_lock++;
-			d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
+			//filp->f_flags |= F_OSPRD_LOCKED;
+			//add_to_pid_list(current->pid, d); //add to read lock list
+			//d->read_lock++;
+			//d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 
 			//eprintk("write lock is: %d\n", d->write_lock);
 			//eprintk("read lock is: %d\n", d->read_lock);
 
-			osp_spin_unlock(&(d->mutex));
+			//osp_spin_unlock(&(d->mutex));
 
 			//wake_up_all(&(d->blockq));
-			return 0;
+			//return 0;
 
 			
 		}
@@ -443,8 +444,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		// be protected by a spinlock; which ones?)
 
 		// Your code here (instead of the next two lines).
-		eprintk("Attempting to acquire\n");
-		r = -ENOTTY;
+		//eprintk("Attempting to acquire\n");
+		//r = -ENOTTY;
 
 	} else if (cmd == OSPRDIOCTRYACQUIRE) {
 		//eprintk("in TRY aqcuire\n");
@@ -467,7 +468,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//eprintk("write lock is: %d\n", d->write_lock);
 			//eprintk("read lock is: %d\n", d->read_lock);
 			osp_spin_unlock(&(d->mutex));
-			return 0;
+			//return 0;
 
 		}
 		else 
