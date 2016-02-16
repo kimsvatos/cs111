@@ -162,7 +162,7 @@ void remove_from_pid_list(pid_t oldpid, pid_list_t* list)
 		list->pid = -1;
 		return;
 	}
-	while(list->next != NULL && list->next->pid != read_pid)
+	while(list->next != NULL && list->next->pid != oldpid)
 		list = list->next;
 
 	if(list->next == NULL){
