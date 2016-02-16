@@ -228,6 +228,39 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 		// as appropriate.
 
 		// Your code here.
+	if((filp->f_flags & F_OSPRD_LOCKED) == 0)
+			return -EINVAL;
+
+		osp_spin_lock(&(d->mutex));
+		if(filp_writable){
+			d->write_lock = 0;
+			d->write_lock_pid = -1;
+		}
+		else {
+			d->read_lock--;
+			eprintk("Number of read locks: %d\n", d->read_lock);
+			//remove from read_lock_pids
+			pid_list_t* ptr = &(d->read_lock_pids);
+			while(1){
+				if(ptr == NULL)
+					break;
+
+				if(ptr->pid == current->pid)
+				{
+					ptr->pid = -1;
+					break;
+				}	
+
+				ptr = ptr->next;
+			}
+
+		}
+
+		filp->f_flags ^= F_OSPRD_LOCKED;
+		osp_spin_unlock(&(d->mutex));
+		wake_up_all(&(d->blockq));
+
+		
 
 		// This line avoids compiler warnings; you may remove it.
 		(void) filp_writable, (void) d;
