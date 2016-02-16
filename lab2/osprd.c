@@ -138,7 +138,7 @@ void add_to_pid_list(int newpid, pid_list_t* list){ //add to list of pids that h
 
 	//pid_list_t* ptr = &(d->read_lock_pids);
 	if(list->pid == -1){
-		list->pid == newpid;
+		list->pid = newpid;
 		return;
 	}
 	while(list->next != NULL)
@@ -192,7 +192,7 @@ static osprd_info_t *file2osprd(struct file *filp);
 int deadlock_check(struct file* filp){
 	
 	osprd_info_t *d = file2osprd(filp);	// device info
-	int r = 0;			// return value: initially 0
+	//int r = 0;			// return value: initially 0
 
 	// is file open for writing?
 	int filp_writable = (filp->f_mode & FMODE_WRITE) != 0;
