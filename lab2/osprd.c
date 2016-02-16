@@ -219,6 +219,7 @@ static int osprd_open(struct inode *inode, struct file *filp)
 // last copy is closed.)
 static int osprd_close_last(struct inode *inode, struct file *filp)
 {
+	eprintk("in close last\n");
 	if (filp) {
 		osprd_info_t *d = file2osprd(filp);
 		int filp_writable = filp->f_mode & FMODE_WRITE;
@@ -260,7 +261,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 		osp_spin_unlock(&(d->mutex));
 		wake_up_all(&(d->blockq));
 
-		
+
 
 		// This line avoids compiler warnings; you may remove it.
 		(void) filp_writable, (void) d;
