@@ -302,6 +302,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 
 	if (cmd == OSPRDIOCACQUIRE) { //attempt write lock
+
 		if(d->write_lock_pid == current->pid) //it would dead lock
 		{
 			return -EDEADLK;
@@ -367,8 +368,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
 
-			osp_spin_lock(&(d->mutex));
-			if(wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0)) {
+			
+			if(wait_event_interruptible(d->blockq, d->ticket_tail >= my_ticket && d->write_lock == 0)) {
 				if(d->ticket_tail == my_ticket){
 					d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail +1);
 					wake_up_all(&(d->blockq));
@@ -381,7 +382,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				wake_up_all(&(d->blockq));
 				return -ERESTARTSYS;
 			}
-			osp_spin_unlock(&(d->mutex));
+			
 
 			eprintk("in ELSE writeable, wait_event must have returned zero\n");
 			eprintk("write lock is: %d\n", d->write_lock);
@@ -389,6 +390,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 
 			osp_spin_lock(&(d->mutex));
+			
 			filp->f_flags |= F_OSPRD_LOCKED;
 			add_to_pid_list(current->pid, d); //add to read lock list
 			d->read_lock++;
