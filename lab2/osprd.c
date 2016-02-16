@@ -322,7 +322,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 			d->read_lock--;
 			//eprintk("Number of read locks: %d\n", d->read_lock);
 			//remove from read_lock_pids
-			remove_from_pid_list(current->pid, &(d->read_lock_pids))
+			remove_from_pid_list(current->pid, &(d->read_lock_pids));
 
 		}
 
@@ -534,7 +534,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			
 
 			osp_spin_lock(&(d->mutex));
-			if((d->write_lock == 0) && (d->read-Locks == 0)){
+			if((d->write_lock == 0) && (d->read_lock == 0)){
 				filp->f_flags |= F_OSPRD_LOCKED;
 				d->write_lock_pid = current->pid;
 				d->write_lock = 1;
@@ -598,7 +598,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			d->read_lock--;
 			//eprintk("Number of read locks: %d\n", d->read_lock);
 			//remove from read_lock_pids
-			pid_list_t* ptr = &(d->read_lock_pids);
+			//pid_list_t* ptr = &(d->read_lock_pids);
 			remove_from_pid_list(current->pid, &(d->read_lock_pids));
 			//pid_t oldpid, pid_list_t* list
 
