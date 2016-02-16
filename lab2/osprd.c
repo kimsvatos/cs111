@@ -219,7 +219,7 @@ static int osprd_open(struct inode *inode, struct file *filp)
 // last copy is closed.)
 static int osprd_close_last(struct inode *inode, struct file *filp)
 {
-	eprintk("in close last\n");
+	
 	if (filp) {
 		osprd_info_t *d = file2osprd(filp);
 		int filp_writable = ((filp->f_mode & FMODE_WRITE) != 0);
@@ -241,7 +241,7 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 		}
 		else {
 			d->read_lock--;
-			eprintk("Number of read locks: %d\n", d->read_lock);
+			
 			//remove from read_lock_pids
 			pid_list_t* ptr = &(d->read_lock_pids);
 			while(1){
