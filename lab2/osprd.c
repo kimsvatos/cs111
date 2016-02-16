@@ -365,7 +365,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			
 			r = wait_event_interruptible(d->blockq, d->ticket_tail == my_ticket && d->write_lock == 0); 
 				if(r == -ERESTARTSYS){
-					if(ticket == d->my_ticket)
+					if(my_ticket == d->ticket_tail)
 						d->ticket_tail = return_valid_ticket(d->invalid_tickets, d->ticket_tail+1);
 
 					else
@@ -447,7 +447,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		//eprintk("Attempting to acquire\n");
 		//r = -ENOTTY;
 
-	} else if (cmd == OSPRDIOCTRYACQUIRE) {
+	 else if (cmd == OSPRDIOCTRYACQUIRE) {
 		//eprintk("in TRY aqcuire\n");
 		//eprintk("write lock is: %d\n", d->write_lock);
 		//eprintk("read lock is: %d\n", d->read_lock);
