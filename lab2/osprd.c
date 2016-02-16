@@ -378,11 +378,11 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					add_to_invalid_list(d->invalid_tickets, my_ticket, d);
 					//d->ticket_head--; 
 				}
-				wake_up_all(&(d->blockq))
+				wake_up_all(&(d->blockq));
 				return -ERESTARTSYS;
 			}
 			osp_spin_unlock(&(d->mutex));
-			
+
 			eprintk("in ELSE writeable, wait_event must have returned zero\n");
 			eprintk("write lock is: %d\n", d->write_lock);
 			eprintk("read lock is: %d\n", d->read_lock);
@@ -399,7 +399,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 			osp_spin_unlock(&(d->mutex));
 
-			wake_up_all(&(d->blockq))
+			wake_up_all(&(d->blockq));
 			return 0;
 
 			
@@ -512,8 +512,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		else {
 			d->read_lock--;
 			eprintk("Number of read locks: %d\n", d->read_lock);
-			//remove from read_lock_pids
-			/*pid_list_t* ptr = &(d->read_lock_pids);
+			remove from read_lock_pids
+			pid_list_t* ptr = &(d->read_lock_pids);
 			while(1){
 				if(ptr == NULL)
 					break;
@@ -525,7 +525,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}	
 
 				ptr = ptr->next;
-			}*/
+			}
 
 		}
 
