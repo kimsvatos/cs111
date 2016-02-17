@@ -47,17 +47,17 @@ module_param(nsectors, int, 0);
 
 
 
-typedef struct pid_list {
+struct pid_list {
 	int pid;
 	struct pid_list* next; 
 
-} pid_list_t;
+};
 
-typedef struct invalid_tickets {
+struct invalid_tickets {
 	int ticketnumber;
 	struct invalid_tickets* next; 
 
-} invalidtickets_t;
+};
 
 /* The internal representation of our device. */
 typedef struct osprd_info {
@@ -81,8 +81,8 @@ typedef struct osprd_info {
 
 	/* HINT: You may want to add additional fields to help
 	         in detecting deadlock. */
-	invalidtickets_t invalid_tickets;
-	pid_list_t read_lock_pids;
+	struct invalid_tickets invalid_tickets;
+	struct pid_list read_lock_pids;
 	pid_t write_lock_pid;
     
 	// The following elements are used internally; you don't need
@@ -97,7 +97,7 @@ typedef struct osprd_info {
 static osprd_info_t osprds[NOSPRD];
 
 
-int return_valid_ticket(invalidtickets_t* invalid, unsigned ticket)
+int return_valid_ticket(struct invalid_tickets* invalid, unsigned ticket)
 {
 	if(invalid->ticketnumber == -1)
 		return ticket;
@@ -117,7 +117,7 @@ int return_valid_ticket(invalidtickets_t* invalid, unsigned ticket)
 	}
 }
 
-void add_to_invalid_list(invalidtickets_t* invalid, unsigned ticket)
+void add_to_invalid_list(struct invalid_tickets* invalid, unsigned ticket)
 {
 	if(invalid->ticketnumber == -1){
 		invalid->ticketnumber = ticket;
@@ -134,7 +134,7 @@ void add_to_invalid_list(invalidtickets_t* invalid, unsigned ticket)
 
 }
 
-void add_to_pid_list(int newpid, pid_list_t* list){ //add to list of pids that have read locks
+void add_to_pid_list(int newpid, struct pid_list* list){ //add to list of pids that have read locks
 	
 
 	//pid_list_t* ptr = &(d->read_lock_pids);
@@ -146,14 +146,14 @@ void add_to_pid_list(int newpid, pid_list_t* list){ //add to list of pids that h
 	{
 		list = list->next;
 	}
-	pid_list_t new;
+	struct pid_list new;
 	new.pid = newpid;
 	new.next = NULL;
 	list->next = &new;
 	return;
 }
 
-void remove_from_pid_list(pid_t oldpid, pid_list_t* list)
+void remove_from_pid_list(pid_t oldpid, struct pid_list* list)
 {
 	if(list->next == NULL){
 		if(list->pid != oldpid){
@@ -411,10 +411,9 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				{
 					d->ticket_tail = return_valid_ticket(&(d->invalid_tickets), d->ticket_tail +1);
 				}
-				else if(d->ticket_tail != my_ticket)
-				{
+				else 
 					add_to_invalid_list(&(d->invalid_tickets), my_ticket);
-				}
+				
 				//wake_up_all(&(d->mutex));
 				osp_spin_unlock(&(d->mutex));
 				wake_up_all(&(d->mutex));
@@ -431,7 +430,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			d->ticket_tail = return_valid_ticket(&(d->invalid_tickets), d->ticket_tail+1);
 			osp_spin_unlock(&(d->mutex));
 
-			return 0;
+			r = 0;
 
 		}
 		else  //get read lock cause not open for writing
@@ -448,11 +447,10 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					d->ticket_tail = return_valid_ticket(&(d->invalid_tickets), d->ticket_tail +1);
 				}
 
-				else if(d->ticket_tail != my_ticket)
-				{
+				else 
 					add_to_invalid_list(&(d->invalid_tickets), my_ticket);
 					//d->ticket_head--; 
-				}
+		
 				wake_up_all(&(d->blockq));
 				osp_spin_unlock(&(d->mutex));
 				return -ERESTARTSYS;
@@ -472,7 +470,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			osp_spin_unlock(&(d->mutex));
 
 			//wake_up_all(&(d->blockq));
-			return 0;
+			r =  0;
 
 			
 		}
@@ -523,7 +521,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 //same code as above basically but dont use wait_event_interruptbile, void waitqueue_active(wait_queuehead_t *q != 0, o means empty
 		if(d->read_lock > 0 || d->write_lock ==1)
 				return -EBUSY;
-			if(filp->f_flags & F_OSPRD_LOCKED)
+
+		if(filp->f_flags & F_OSPRD_LOCKED)
 				return -EBUSY;
 
 		if(filp_writable){
@@ -532,7 +531,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 			osp_spin_lock(&(d->mutex));
 			if((d->write_lock == 0) && (d->read_lock == 0)){
-				filp->f_flags |= F_OSPRD_LOCKED;
+				//filp->f_flags |= F_OSPRD_LOCKED;
 				d->write_lock_pid = current->pid;
 				d->write_lock = 1;
 				//d->ticket_head++;
@@ -542,10 +541,12 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//eprintk("write lock is: %d\n", d->write_lock);
 			//eprintk("read lock is: %d\n", d->read_lock);
 				osp_spin_unlock(&(d->mutex));
-				return 0;
+				filp->f_flags |= F_OSPRD_LOCKED;
+				r = 0;
 			}
+			
+			r =  -EBUSY;
 			osp_spin_unlock(&(d->mutex));
-			return -EBUSY;
 			
 		}
 		else 
@@ -564,11 +565,11 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 					//d->ticket_head= return_valid_ticket(d->invalid_tickets, d->ticket_head+1);
 					filp->f_flags |= F_OSPRD_LOCKED;
 					osp_spin_unlock(&(d->mutex));
-					return 0;
+					r =  0;
 				}	
 
 				osp_spin_unlock(&(d->mutex));
-				return -EBUSY;
+				r =  -EBUSY;
 			
 		}
 
@@ -588,7 +589,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 	//eprintk("in release\n");
 		if((filp->f_flags & F_OSPRD_LOCKED) == 0)
-			return -EINVAL;
+			r = -EINVAL;
 
 		filp->f_flags &= ~F_OSPRD_LOCKED;
 		osp_spin_lock(&(d->mutex));
@@ -604,9 +605,10 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		}
 		//filp->f_flags ^= F_OSPRD_LOCKED;
 		//filp->f_flags ^= F_OSPRD_LOCKED;
+		wake_up_all(&(d->blockq));
 		osp_spin_unlock(&(d->mutex));
 
-		wake_up_all(&(d->blockq));
+		//
 		// EXERCISE: Unlock the ramdisk.
 		//
 		// If the file hasn't locked the ramdisk, return -EINVAL.
@@ -617,7 +619,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 		// Your code here (instead of the next line).
 		//r = -ENOTTY;
 		//filp->f_flags ^= F_OSPRD_LOCKED;
- 		return 0;
+ 		r =  0;
 	} else
 		r = -ENOTTY; /* unknown command */
 	return r;
