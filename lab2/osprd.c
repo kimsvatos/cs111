@@ -126,7 +126,7 @@ void add_to_invalid_list(struct invalid_tickets* invalid, unsigned ticket)
 	while(invalid->next != NULL)
 		invalid = invalid->next;
 
-	invalidtickets_t new;
+	struct invalid_tickets new;
 	new.ticketnumber = ticket;
 	new.next = NULL;
 	invalid->next = &new;
