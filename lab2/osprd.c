@@ -209,7 +209,7 @@ int deadlock_check(struct file* filp){
 		return -1;
 	}
 	
-	pid_list_t * li = &(d->read_lock_pids);
+	struct pid_list* li = &(d->read_lock_pids);
 	//if(li->next == NULL)
 		//eprintk("%d -> ", li->pid);
 	
