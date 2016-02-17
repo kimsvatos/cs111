@@ -9,9 +9,9 @@
 # the end of the file.
 
 # Partner 1
-Name: Your Name Here
-Student ID: Your ID Here
-Email: Your Email Here
+Name: Kimberly Svatos
+Student ID: 604 425 426
+Email: kimsvatos@ucla.edu
 
 # Partner 2
 #Name: Partner's Name Here
