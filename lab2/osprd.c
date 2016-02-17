@@ -616,7 +616,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 		// Your code here (instead of the next line).
 		//r = -ENOTTY;
-		filp->f_flags &= ^F_OSPRD_LOCKED;
+		filp->f_flags &= ~F_OSPRD_LOCKED;
  		return 0;
 	} else
 		r = -ENOTTY; /* unknown command */
