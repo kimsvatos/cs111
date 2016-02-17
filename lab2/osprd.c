@@ -117,8 +117,9 @@ int return_valid_ticket(invalidtickets_t* invalid, unsigned ticket)
 	}
 }
 
-void add_to_invalid_list(invalidtickets_t* invalid, unsigned ticket)
+/*void add_to_invalid_list(invalidtickets_t* invalid, unsigned ticket)
 {
+	
 	if(invalid->ticketnumber == -1){
 		invalid->ticketnumber = ticket;
 	}
@@ -132,7 +133,8 @@ void add_to_invalid_list(invalidtickets_t* invalid, unsigned ticket)
 	invalid->next = &new;
 	return;
 
-}
+
+}*/
 
 void add_to_pid_list(int newpid, pid_list_t* list){ //add to list of pids that have read locks
 	
@@ -169,6 +171,7 @@ void remove_from_pid_list(pid_t oldpid, pid_list_t* list)
 	if(list->next == NULL){
 		//pid couldnt be found
 		eprintk("Invalid pid, not in read list\n");
+		return;
 	}
 
 	list->next = list->next->next;
@@ -413,7 +416,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}
 				else if(d->ticket_tail != my_ticket)
 				{
-					add_to_invalid_list(&(d->invalid_tickets), my_ticket);
+					ticket_head--;
+					//add_to_invalid_list(&(d->invalid_tickets), my_ticket);
 				}
 				//wake_up_all(&(d->mutex));
 				osp_spin_unlock(&(d->mutex));
@@ -450,8 +454,8 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 				else if(d->ticket_tail != my_ticket)
 				{
-					add_to_invalid_list(&(d->invalid_tickets), my_ticket);
-					//d->ticket_head--; 
+					//add_to_invalid_list(&(d->invalid_tickets), my_ticket);
+					d->ticket_head--; 
 				}
 				wake_up_all(&(d->blockq));
 				osp_spin_unlock(&(d->mutex));
@@ -525,6 +529,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				return -EBUSY;
 			if(filp->f_flags & F_OSPRD_LOCKED)
 				return -EBUSY;
+
 
 		if(filp_writable){
 			
