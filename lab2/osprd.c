@@ -565,7 +565,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				return 0;
 			}
 			osp_spin_unlock(&(d->mutex));
-			else return -EBUSY;
+			return -EBUSY;
 			//osp_spin_unlock(&(d->mutex));
 		}
 		else 
@@ -588,7 +588,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}	
 
 				osp_spin_unlock(&(d->mutex));
-				else return -EBUSY;
+				return -EBUSY;
 			//osp_spin_unlock(&(d->mutex));
 		}
 
