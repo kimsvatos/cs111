@@ -101,7 +101,7 @@ int return_valid_ticket(struct invalid_tickets* invalid, unsigned ticket)
 {
 	if(invalid->ticketnumber == -1)
 		return ticket;
-	invalidtickets_t* ptr = invalid; 
+	struct invalid_tickets* ptr = invalid; 
 	while(1){
  		
  			if(ptr->ticketnumber == ticket)
