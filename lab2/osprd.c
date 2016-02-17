@@ -374,9 +374,9 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 
 	
-	if(current->pid == write_lock_pid)
+	if(current->pid == d->write_lock_pid)
 		return -EDEADLK;
-	
+
 	// Set 'r' to the ioctl's return value: 0 on success, negative on error
 	
 
