@@ -204,22 +204,23 @@ int deadlock_check(struct file* filp){
   	if(filp->f_flags & F_OSPRD_LOCKED)
     		return -1;
 	if(current->pid == d->write_lock_pid){
-		eprintk("deadlock catch: current pid has a lock already.\n");		
+		//eprintk("deadlock catch: current pid has a lock already.\n");		
 		return -1;
 	}
 	
 	pid_list_t * li = &(d->read_lock_pids);
-	if(li->next == NULL)
-		eprintk("%d -> ", li->pid);
+	//if(li->next == NULL)
+		//eprintk("%d -> ", li->pid);
+	
 	while(li->next !=NULL){
-		eprintk("%d -> ", li->pid);
+		//eprintk("%d -> ", li->pid);
 		if(li->pid == current->pid){
-			eprintk("deadlock catch: current pid has a read lock\n");
+			//eprintk("deadlock catch: current pid has a read lock\n");
 			return -EDEADLK;
 		}
 		li = li->next;
 	}
-	eprintk("\n");
+	//eprintk("\n");
 	return 0;
 }
 
@@ -373,7 +374,9 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 
 
 	
-
+	if(current->pid == write_lock_pid)
+		return -EDEADLK;
+	
 	// Set 'r' to the ioctl's return value: 0 on success, negative on error
 	
 
