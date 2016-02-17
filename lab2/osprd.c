@@ -602,7 +602,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 			//pid_t oldpid, pid_list_t* list
 
 		}
-		filp->f_flags ^= F_OSPRD_LOCKED;
+		//filp->f_flags ^= F_OSPRD_LOCKED;
 		//filp->f_flags ^= F_OSPRD_LOCKED;
 		osp_spin_unlock(&(d->mutex));
 
