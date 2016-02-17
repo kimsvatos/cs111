@@ -416,7 +416,7 @@ int osprd_ioctl(struct inode *inode, struct file *filp,
 				}
 				else if(d->ticket_tail != my_ticket)
 				{
-					ticket_head--;
+					d->ticket_head--;
 					//add_to_invalid_list(&(d->invalid_tickets), my_ticket);
 				}
 				//wake_up_all(&(d->mutex));
