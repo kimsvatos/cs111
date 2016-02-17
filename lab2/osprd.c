@@ -325,11 +325,11 @@ static int osprd_close_last(struct inode *inode, struct file *filp)
 			d->write_lock_pid = -1;
 			d->write_lock = 0;
 		}
-		osp_spin_unlock(&(d->mutex));
+		//osp_spin_unlock(&(d->mutex));
 
 	
 		else {
-			osp_spin_lock(&(d->mutex));
+			//osp_spin_lock(&(d->mutex));
 			d->read_lock--;
 			//eprintk("Number of read locks: %d\n", d->read_lock);
 			//remove from read_lock_pids
