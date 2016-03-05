@@ -72,7 +72,7 @@ int scheduling_algorithm;
 #define __EXERCISE_4B__ 42  // p_share algorithm (exercise 4.b)
 #define __EXERCISE_7__   7  // any algorithm for exercise 7
 
-
+pid_t last_ran;
 /*****************************************************************************
  * start
  *
@@ -88,7 +88,7 @@ start(void)
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
-	interrupt_controller_init(0);
+	interrupt_controller_init(1);
 	console_clear();
 
 	// Initialize process descriptors as empty
@@ -128,7 +128,7 @@ start(void)
 	//   42 = p_share algorithm (exercise 4.b)
 	//    7 = any algorithm that you may implement for exercise 7
 	scheduling_algorithm = 0;
-
+	last_ran =1;
 	// Switch to the first process.
 	run(&proc_array[1]);
 
@@ -244,6 +244,29 @@ schedule(void)
 			}
 		}
 
+		else if(scheduling_algorithm == 2){
+			int j;
+			uint32_t min;
+			while(1){
+
+				for(j = 1; j < NPROCS; ++j){
+					if(proc_array[j].p_state == P_RUNNABLE && proc_array[j].p_priority < min) {
+						min = proc_array[j].p_priority;
+					}
+				}
+
+				if(last_ran == pid){
+					pid_t this_pid = pid;
+					for(pid = (pid+1) % NPROCS; pid != original_pid; pid = (pid +1) % NPROCS)
+						if(proc_array[pid].p_state == P_RUNNABLE && proc_array[pid].p_priority == min){
+							last_ran = pid;
+							run(&proc_array[pid]);
+						}
+				}
+				last_ran = pid;
+				run(&proc_array[pid]);
+			}
+		}
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
 	while (1)
