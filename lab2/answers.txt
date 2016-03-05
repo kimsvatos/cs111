@@ -10,7 +10,7 @@
 
 # Partner 1
 Name: Kimberly Svatos
-Student ID: 604 425 426
+Student ID: 604425426
 Email: kimsvatos@ucla.edu
 
 # Partner 2
