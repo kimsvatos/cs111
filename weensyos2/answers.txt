@@ -1,5 +1,5 @@
-Name:
-UCLA ID:
+Name: Kimberly Svatos
+UCLA ID: 604 425 426
 
 Collaborators:
 
@@ -7,16 +7,30 @@ Collaborators:
 
 Response to Exercise 1:
 
-The name of the scheduling algorithm is:
+The name of the scheduling algorithm is: round-robin
 
 
 (Exercise 2 is a coding exercise)
+In schedos-kern.c I added:
+
+	else if(scheduling_algorithm == 2){ //strict priority, exercise 2
+			int j;
+ 			while(1){
+ 				for(j = 1; j < NPROCS; ++j){
+ 					if(proc_array[j].p_state == P_RUNNABLE){
+ 						run(&proc_array[j]);
+ 					}
+ 				}
+ 			}
+ 		}
+
+and in schedos-1.c, I changed sys_yield(); to sys_exit(0);
 
 
 Response to Exercise 3:
 
-Average turnaround time for scheduling_algorithm 0:
-Average turnaround time for scheduling_algorithm 1:
+Average turnaround time for scheduling_algorithm 0: 320 * 4 = 1280
+Average turnaround time for scheduling_algorithm 1: 320 * 4 = 1280
 
 Average wait time for scheduling_algorithm 0:
 Average wait time for scheduling_algorithm 1:
@@ -26,6 +40,7 @@ Exercise 4:
 
 Did you complete Exercise 4A, Exercise 4B, or both for extra credit?
 
+Both. 
 
 Exercise 5:
 

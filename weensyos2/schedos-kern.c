@@ -127,7 +127,7 @@ start(void)
 	//   41 = p_priority algorithm (exercise 4.a)
 	//   42 = p_share algorithm (exercise 4.b)
 	//    7 = any algorithm that you may implement for exercise 7
-	scheduling_algorithm = 2;
+	scheduling_algorithm = __EXERCISE_2__;
 
 	// Switch to the first process.
 	run(&proc_array[1]);
@@ -230,7 +230,7 @@ schedule(void)
 				run(&proc_array[pid]);
 		}
 
-	else if(scheduling_algorithm == 2){ //strict priority, exercise 2
+	else if(scheduling_algorithm ==  __EXERCISE_2__ ){ //strict priority, exercise 2
 			int j;
  			while(1){
  				for(j = 1; j < NPROCS; ++j){
