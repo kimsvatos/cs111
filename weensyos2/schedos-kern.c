@@ -214,20 +214,20 @@ interrupt(registers_t *reg)
 		schedule();
 
 	// for exercise 4A
-	case INT_SYS_PRIORITY:
+	case __EXERCISE_4A__://INT_SYS_PRIORITY:
 		current->p_priority =  reg->reg_eax;
 		schedule();
 
 	// for exercise 4B
-	case INT_SYS_SHARE:
+	case __EXERCISE_4B__://INT_SYS_SHARE:
 		current->p_share = reg->reg_eax;
 		current->p_share_count = current->p_share;
 		schedule();
 
-	case INT_SYS_PRINT:{
-		*cursorpos++ = (uint16_t) reg->reg_eax;
-		run(current);
-	}
+	//case INT_SYS_PRINT:{
+	//	*cursorpos++ = (uint16_t) reg->reg_eax;
+//		run(current);/
+	//}
 
 
 	default:
