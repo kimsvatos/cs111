@@ -39,6 +39,11 @@
 void
 start(void)
 {
+
+	sys_priority(PRIORITY);
+	sys_share(SHARE);
+	sys_yield();
+
 	int i;
 
 	for (i = 0; i < RUNCOUNT; i++) {
