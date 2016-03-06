@@ -103,6 +103,9 @@ start(void)
 		process_t *proc = &proc_array[i];
 		uint32_t stack_ptr = PROC1_START + i * PROC_SIZE;
 
+		//prop scheduling
+		proc->p_share = 1;
+		proc->p_run_t = 0;
 		// Initialize the process descriptor
 		special_registers_init(proc);
 
@@ -127,7 +130,7 @@ start(void)
 	//   41 = p_priority algorithm (exercise 4.a)
 	//   42 = p_share algorithm (exercise 4.b)
 	//    7 = any algorithm that you may implement for exercise 7
-	scheduling_algorithm = __EXERCISE_2__;
+	scheduling_algorithm = __EXERCISE_4A__;
 
 	// Switch to the first process.
 	run(&proc_array[1]);
@@ -176,15 +179,17 @@ interrupt(registers_t *reg)
 		current->p_exit_status = reg->reg_eax;
 		schedule();
 
-	case INT_SYS_USER1:
-		// 'sys_user*' are provided for your convenience, in case you
-		// want to add a system call.
-		/* Your code here (if you want). */
+	case INT_SYS_USER1: //sys_share
+		current->p_share = reg->reg_eax;
+		
 		run(current);
 
-	case INT_SYS_USER2:
-		/* Your code here (if you want). */
+	case INT_SYS_USER2: //sys_priority
+		
+		current->p_priority = reg->reg_eax;
 		run(current);
+
+
 
 	case INT_CLOCK:
 		// A clock interrupt occurred (so an application exhausted its
@@ -218,6 +223,7 @@ void
 schedule(void)
 {
 	pid_t pid = current->p_pid;
+	unsigned int min = 0xffffffff;
 
 	if (scheduling_algorithm == 0)
 		while (1) {
@@ -240,7 +246,22 @@ schedule(void)
  				}
  			}
  		}
+	else if(scheduling_algorithm ==  __EXERCISE_4A__){ //exercise 4a
+			pid_t j;
+			while(1){
+				for (j = 0; j < NPROCS; j++)
+					if (proc_array[j].p_state == P_RUNNABLE &&
+						proc_array[j].p_priority < min)
+						min = proc_array[i].p_priority;
 
+				// search first highest-priority task
+				pid = (pid + 1) % NPROCS; // to alternate, start with next proc
+				if (proc_array[pid].p_state == P_RUNNABLE &&
+					proc_array[pid].p_priority <= min)
+					run(&proc_array[pid]);
+
+			}
+ 		} 		
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
 	while (1)
