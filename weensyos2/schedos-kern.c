@@ -265,7 +265,7 @@ schedule(void)
 
  	else if(scheduling_algorithm ==  __EXERCISE_4B__){ //prop share
 				while (1) {
-				if (proc_array[pid].p_state == P_RUNNABLE) {
+					if (proc_array[pid].p_state == P_RUNNABLE) {
 					// skip if run more than share
 					if (proc_array[pid].p_run_t >= proc_array[pid].p_share) {
 						proc_array[pid].p_run_t = 0;
@@ -278,7 +278,8 @@ schedule(void)
 				
 				pid = (pid + 1) % NPROCS;
 
- 	} 			
+ 	} 
+ 	}			
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
 	while (1)
