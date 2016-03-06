@@ -52,18 +52,18 @@ int scheduling_algorithm;
 // UNCOMMENT THESE LINES IF YOU DO EXERCISE 4.A
 // Use these #defines to initialize your implementation.
 // Changing one of these lines should change the initialization.
-// #define __PRIORITY_1__ 1
-// #define __PRIORITY_2__ 2
-// #define __PRIORITY_3__ 3
-// #define __PRIORITY_4__ 4
+ #define __PRIORITY_1__ 1
+ #define __PRIORITY_2__ 2
+ #define __PRIORITY_3__ 3
+ #define __PRIORITY_4__ 4
 
 // UNCOMMENT THESE LINES IF YOU DO EXERCISE 4.B
 // Use these #defines to initialize your implementation.
 // Changing one of these lines should change the initialization.
-// #define __SHARE_1__ 1
-// #define __SHARE_2__ 2
-// #define __SHARE_3__ 3
-// #define __SHARE_4__ 4
+ #define __SHARE_1__ 1
+ #define __SHARE_2__ 2
+ #define __SHARE_3__ 3
+ #define __SHARE_4__ 4
 
 // USE THESE VALUES FOR SETTING THE scheduling_algorithm VARIABLE.
 #define __EXERCISE_1__   0  // the initial algorithm
@@ -120,6 +120,26 @@ start(void)
 	// console's first character (the upper left).
 	cursorpos = (uint16_t *) 0xB8000;
 
+
+
+	// for 4A testing purposes
+	proc_array[1].p_priority = __PRIORITY_1__;
+	proc_array[2].p_priority = __PRIORITY_1__;
+	proc_array[3].p_priority = __PRIORITY_1__;
+	proc_array[4].p_priority = __PRIORITY_2__;
+	
+	
+	// for 4B testing purposes
+	proc_array[1].p_share = __SHARE_1__;
+	proc_array[2].p_share = __SHARE_2__;
+	proc_array[3].p_share = __SHARE_3__;
+	proc_array[4].p_share = __SHARE_4__;
+
+	proc_array[1].p_share_count = __SHARE_1__;
+	proc_array[2].p_share_count = __SHARE_2__;
+	proc_array[3].p_share_count = __SHARE_3__;
+	proc_array[4].p_share_count = __SHARE_4__;
+
 	// Initialize the scheduling algorithm.
 	// USE THE FOLLOWING VALUES:
 	//    0 = the initial algorithm
@@ -127,6 +147,7 @@ start(void)
 	//   41 = p_priority algorithm (exercise 4.a)
 	//   42 = p_share algorithm (exercise 4.b)
 	//    7 = any algorithm that you may implement for exercise 7
+
 	scheduling_algorithm = 0;
 	last_ran =1;
 	// Switch to the first process.
@@ -192,6 +213,23 @@ interrupt(registers_t *reg)
 		// Switch to the next runnable process.
 		schedule();
 
+	// for exercise 4A
+	case INT_SYS_PRIORITY:
+		current->p_priority =  reg->reg_eax;
+		schedule();
+
+	// for exercise 4B
+	case INT_SYS_SHARE:
+		current->p_share = reg->reg_eax;
+		current->p_share_count = current->p_share;
+		schedule();
+
+	case INT_SYS_PRINT:{
+		*cursorpos++ = (uint16_t) reg->reg_eax;
+		run(current);
+	}
+
+
 	default:
 		while (1)
 			/* do nothing */;
@@ -219,7 +257,7 @@ schedule(void)
 {
 	pid_t pid = current->p_pid;
 
-	if (scheduling_algorithm == 0)
+	if (scheduling_algorithm == 0) //round robin
 		while (1) {
 			pid = (pid + 1) % NPROCS;
 
@@ -233,7 +271,7 @@ schedule(void)
 			if (proc_array[pid].p_state == P_RUNNABLE)
 				run(&proc_array[pid]);
 		}
-		else if(scheduling_algorithm ==1){
+		else if(scheduling_algorithm ==1){ //priority
 			int j;
 			while(1){
 				for(j = 1; j < NPROCS; ++j){
@@ -257,7 +295,7 @@ schedule(void)
 
 				if(last_ran == pid){
 					pid_t this_pid = pid;
-					for(pid = (pid+1) % NPROCS; pid != original_pid; pid = (pid +1) % NPROCS)
+					for(pid = (pid+1) % NPROCS; pid != this_pid; pid = (pid +1) % NPROCS)
 						if(proc_array[pid].p_state == P_RUNNABLE && proc_array[pid].p_priority == min){
 							last_ran = pid;
 							run(&proc_array[pid]);
@@ -265,6 +303,24 @@ schedule(void)
 				}
 				last_ran = pid;
 				run(&proc_array[pid]);
+			}
+		}
+		else if(scheduling_algorithm ==3){
+			//also implement sys call that lets processes set their share
+			//proportional share scheduling
+			//each process allocated amount of CPU time prop to share
+			int j = 0;
+			while(1){
+
+				if (proc_array[pid].p_state == P_RUNNABLE){
+					break;
+				}
+				pid = (pid+1) % NPROCS;
+			}
+			pid_t highest_pr_pid = pid;
+			int highest_pr = proc_array[pid].p_priority;
+			while(j < NPROCS-1) {
+
 			}
 		}
 	// If we get here, we are running an unknown scheduling algorithm.
