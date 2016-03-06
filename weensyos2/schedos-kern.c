@@ -284,7 +284,7 @@ schedule(void)
 
 		else if(scheduling_algorithm == 2){
 			int j;
-			uint32_t min;
+			uint32_t min = 0xffffffff;
 			while(1){
 
 				for(j = 1; j < NPROCS; ++j){
