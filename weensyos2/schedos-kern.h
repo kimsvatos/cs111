@@ -26,6 +26,7 @@ typedef struct process {
 	unsigned int p_priority;
 	unsigned int p_share;
 	unsigned int p_ran;
+	unsigned int p_share_count;
 
 
 	registers_t p_registers;	// Current process state: registers,
