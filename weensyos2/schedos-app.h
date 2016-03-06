@@ -95,6 +95,21 @@ sys_share(int share)
 		         "a" (share)
 		     : "cc", "memory");
 }
+/*****************************************************************************
+ * sys_print
+ *
+ *   Added for exercise 6
+ *
+ *****************************************************************************/
+
+static inline void
+sys_print(int print)
+{
+	asm volatile("int %0\n"
+		     : : "i" (INT_SYS_PRINT),
+		         "a" (print)
+		     : "cc", "memory");
+}
 
 
 

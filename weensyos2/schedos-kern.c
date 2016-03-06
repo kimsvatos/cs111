@@ -88,7 +88,7 @@ start(void)
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
-	interrupt_controller_init(0);
+	interrupt_controller_init(1);
 	console_clear();
 
 	// Initialize process descriptors as empty
@@ -130,7 +130,7 @@ start(void)
 	//   41 = p_priority algorithm (exercise 4.a)
 	//   42 = p_share algorithm (exercise 4.b)
 	//    7 = any algorithm that you may implement for exercise 7
-	scheduling_algorithm = __EXERCISE_4B__;
+	scheduling_algorithm = 0;
 
 	// Switch to the first process.
 	run(&proc_array[1]);
@@ -189,7 +189,9 @@ interrupt(registers_t *reg)
 		current->p_priority = reg->reg_eax;
 		run(current);
 
-
+	case INT_SYS_PRINT: //new system call for ex. 6
+        *cursorpos++ = reg->reg_eax;
+        run(current);
 
 	case INT_CLOCK:
 		// A clock interrupt occurred (so an application exhausted its

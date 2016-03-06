@@ -48,7 +48,9 @@ start(void)
 
 	for (i = 0; i < RUNCOUNT; i++) {
 		// Write characters to the console, yielding after each one.
-		*cursorpos++ = PRINTCHAR;
+		//*cursorpos++ = PRINTCHAR;
+		//call system call instead
+		sys_print(PRINTCHAR);
 		sys_yield();
 	}
 

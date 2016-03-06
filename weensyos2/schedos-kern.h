@@ -26,7 +26,7 @@ typedef struct process {
 	unsigned int p_priority;
 	unsigned int p_share;
 	unsigned int p_run_t;
-	
+
 	registers_t p_registers;	// Current process state: registers,
 					// stack location, EIP, etc.
 					// 'registers_t' defined in x86.h
@@ -37,7 +37,7 @@ typedef struct process {
 
 
 // Clock frequency: the clock interrupt, if any, happens HZ times a second
-#define HZ			100
+#define HZ			1000
 
 // The interrupt number corresponding to the first hardware interrupt
 #define INT_HARDWARE		32

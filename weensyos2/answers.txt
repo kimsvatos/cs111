@@ -45,10 +45,15 @@ Exercise 4:
 
 Did you complete Exercise 4A, Exercise 4B, or both for extra credit?
 Both. 
-
+Note: 
+	INT_SYS_USER1 is used for sys_share
+	INT_SYS_USER2 is used for sys_priority
 
 Exercise 5:
-
+The first portion of output in the image reads: (with spacing added)
+1234 1234 1234 1234 123 1234
+this indicates that process four was interrupted, as it did not print in the 
+5th round robin cycle. 
 
 (Exercise 6 is a coding exercise)
 
