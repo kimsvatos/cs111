@@ -252,7 +252,7 @@ schedule(void)
 				for (j = 0; j < NPROCS; j++)
 					if (proc_array[j].p_state == P_RUNNABLE &&
 						proc_array[j].p_priority < min)
-						min = proc_array[i].p_priority;
+						min = proc_array[j].p_priority;
 
 				// search first highest-priority task
 				pid = (pid + 1) % NPROCS; // to alternate, start with next proc
