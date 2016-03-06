@@ -52,18 +52,18 @@ int scheduling_algorithm;
 // UNCOMMENT THESE LINES IF YOU DO EXERCISE 4.A
 // Use these #defines to initialize your implementation.
 // Changing one of these lines should change the initialization.
- #define __PRIORITY_1__ 1
- #define __PRIORITY_2__ 2
- #define __PRIORITY_3__ 3
- #define __PRIORITY_4__ 4
+// #define __PRIORITY_1__ 1
+// #define __PRIORITY_2__ 2
+// #define __PRIORITY_3__ 3
+// #define __PRIORITY_4__ 4
 
 // UNCOMMENT THESE LINES IF YOU DO EXERCISE 4.B
 // Use these #defines to initialize your implementation.
 // Changing one of these lines should change the initialization.
- #define __SHARE_1__ 1
- #define __SHARE_2__ 2
- #define __SHARE_3__ 3
- #define __SHARE_4__ 4
+// #define __SHARE_1__ 1
+// #define __SHARE_2__ 2
+// #define __SHARE_3__ 3
+// #define __SHARE_4__ 4
 
 // USE THESE VALUES FOR SETTING THE scheduling_algorithm VARIABLE.
 #define __EXERCISE_1__   0  // the initial algorithm
@@ -72,7 +72,7 @@ int scheduling_algorithm;
 #define __EXERCISE_4B__ 42  // p_share algorithm (exercise 4.b)
 #define __EXERCISE_7__   7  // any algorithm for exercise 7
 
-pid_t last_ran;
+
 /*****************************************************************************
  * start
  *
@@ -88,7 +88,7 @@ start(void)
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
-	interrupt_controller_init(1);
+	interrupt_controller_init(0);
 	console_clear();
 
 	// Initialize process descriptors as empty
@@ -120,26 +120,6 @@ start(void)
 	// console's first character (the upper left).
 	cursorpos = (uint16_t *) 0xB8000;
 
-
-
-	// for 4A testing purposes
-	proc_array[1].p_priority = __PRIORITY_1__;
-	proc_array[2].p_priority = __PRIORITY_1__;
-	proc_array[3].p_priority = __PRIORITY_1__;
-	proc_array[4].p_priority = __PRIORITY_2__;
-	
-	
-	// for 4B testing purposes
-	proc_array[1].p_share = __SHARE_1__;
-	proc_array[2].p_share = __SHARE_2__;
-	proc_array[3].p_share = __SHARE_3__;
-	proc_array[4].p_share = __SHARE_4__;
-
-	proc_array[1].p_share_count = __SHARE_1__;
-	proc_array[2].p_share_count = __SHARE_2__;
-	proc_array[3].p_share_count = __SHARE_3__;
-	proc_array[4].p_share_count = __SHARE_4__;
-
 	// Initialize the scheduling algorithm.
 	// USE THE FOLLOWING VALUES:
 	//    0 = the initial algorithm
@@ -147,9 +127,8 @@ start(void)
 	//   41 = p_priority algorithm (exercise 4.a)
 	//   42 = p_share algorithm (exercise 4.b)
 	//    7 = any algorithm that you may implement for exercise 7
-
 	scheduling_algorithm = 0;
-	last_ran =1;
+
 	// Switch to the first process.
 	run(&proc_array[1]);
 
@@ -213,23 +192,6 @@ interrupt(registers_t *reg)
 		// Switch to the next runnable process.
 		schedule();
 
-	// for exercise 4A
-	case __EXERCISE_4A__://INT_SYS_PRIORITY:
-		current->p_priority =  reg->reg_eax;
-		schedule();
-
-	// for exercise 4B
-	case __EXERCISE_4B__://INT_SYS_SHARE:
-		current->p_share = reg->reg_eax;
-		current->p_share_count = current->p_share;
-		schedule();
-
-	//case INT_SYS_PRINT:{
-	//	*cursorpos++ = (uint16_t) reg->reg_eax;
-//		run(current);/
-	//}
-
-
 	default:
 		while (1)
 			/* do nothing */;
@@ -257,72 +219,17 @@ schedule(void)
 {
 	pid_t pid = current->p_pid;
 
-	if (scheduling_algorithm == 0) //round robin
+	if (scheduling_algorithm == 0)
 		while (1) {
 			pid = (pid + 1) % NPROCS;
 
 			// Run the selected process, but skip
 			// non-runnable processes.
 			// Note that the 'run' function does not return.
-
-			//CHECK THIS THIS IS CODE GIVEN BY TA MAKE SURE RIGHT PLACE
-
-
 			if (proc_array[pid].p_state == P_RUNNABLE)
 				run(&proc_array[pid]);
 		}
-		else if(scheduling_algorithm ==1){ //priority
-			int j;
-			while(1){
-				for(j = 1; j < NPROCS; ++j){
-					if(proc_array[j].p_state == P_RUNNABLE){
-						run(&proc_array[j]);
-					}
-				}
-			}
-		}
 
-		else if(scheduling_algorithm == 2){
-			int j;
-			uint32_t min = 0xffffffff;
-			while(1){
-
-				for(j = 1; j < NPROCS; ++j){
-					if(proc_array[j].p_state == P_RUNNABLE && proc_array[j].p_priority < min) {
-						min = proc_array[j].p_priority;
-					}
-				}
-
-				if(last_ran == pid){
-					pid_t this_pid = pid;
-					for(pid = (pid+1) % NPROCS; pid != this_pid; pid = (pid +1) % NPROCS)
-						if(proc_array[pid].p_state == P_RUNNABLE && proc_array[pid].p_priority == min){
-							last_ran = pid;
-							run(&proc_array[pid]);
-						}
-				}
-				last_ran = pid;
-				run(&proc_array[pid]);
-			}
-		}
-		else if(scheduling_algorithm ==3){
-			//also implement sys call that lets processes set their share
-			//proportional share scheduling
-			//each process allocated amount of CPU time prop to share
-			int j = 0;
-			while(1){
-
-				if (proc_array[pid].p_state == P_RUNNABLE){
-					break;
-				}
-				pid = (pid+1) % NPROCS;
-			}
-			pid_t highest_pr_pid = pid;
-			int highest_pr = proc_array[pid].p_priority;
-			while(j < NPROCS-1) {
-
-			}
-		}
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
 	while (1)
