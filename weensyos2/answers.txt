@@ -56,10 +56,41 @@ this indicates that process four was interrupted, as it did not print in the
 5th round robin cycle. 
 
 (Exercise 6 is a coding exercise)
+I added a sys_print system call, for which:
+INT_SYS_PRINT was defined as a constant in schedos.h
+sys_print() was added as a system call in schedos-app.h
 
+added in schedos-kern.c:
+	case INT_SYS_PRINT: //new system call for ex. 6
+        *cursorpos++ = reg->reg_eax;
+        run(current);
+and in schedos-1.c:
+	replaced
+			*cursorpos++ = PRINTCHAR;
+	with
+			sys_print(PRINTCHAR);
 
 Anything else you'd like us to know:
 
 
 
 Extra credit exercises:
+
+8. Implemented spin lock as another method of synchronization. 
+to schedos-symbols.ld, added:
+	PROVIDE(spin_lock = 0x198004);
+In schedos-1.c, added:
+
+		#ifndef __EXERCISE_8__
+		sys_print(PRINTCHAR);
+		#endif
+
+		#ifdef __EXERCISE_8__
+		while(atomic_swap(&spin_lock, 1) != 0){ //run forever until locked
+			continue;
+		}
+		*cursorpos++ = PRINTCHAR;
+		atomic_swap(&spin_lock, 0); //free
+		#endif
+
+
