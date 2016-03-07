@@ -2,4 +2,4 @@
 
 PROVIDE(cursorpos = 0x198000);
 
-PROVIDE(spin_lock = 0x198004;)
+PROVIDE(spin_lock = 0x198004);
