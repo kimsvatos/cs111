@@ -27,7 +27,7 @@
 #define SHARE 10
 #endif
 // UNCOMMENT THE NEXT LINE TO USE EXERCISE 8 CODE INSTEAD OF EXERCISE 6
-// #define __EXERCISE_8__
+ #define __EXERCISE_8__
 // Use the following structure to choose between them:
 // #infdef __EXERCISE_8__
 // (exercise 6 code)
@@ -50,7 +50,18 @@ start(void)
 		// Write characters to the console, yielding after each one.
 		//*cursorpos++ = PRINTCHAR;
 		//call system call instead
+		#ifndef __EXERCISE_8__
 		sys_print(PRINTCHAR);
+		#endif
+
+		#ifdef __EXERCISE_8__
+		while(atomic_swap(&spin_lock, 1) != 0){ //run 4ever until locked
+			continue;
+		}
+		*cursorpos++ = PRINTCHAR;
+		atomic_swap(&spin_lock, 0); //free
+		#endif
+
 		sys_yield();
 	}
 
