@@ -86,7 +86,8 @@ In schedos-1.c, added:
 		#endif
 
 		#ifdef __EXERCISE_8__
-		while(atomic_swap(&spin_lock, 1) != 0){ //run forever until locked
+		while(atomic_swap(&spin_lock, 1) != 0){
+ //run forever until locked
 			continue;
 		}
 		*cursorpos++ = PRINTCHAR;
